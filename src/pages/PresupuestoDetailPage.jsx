@@ -48,14 +48,29 @@ export default function PresupuestoDetailPage() {
   };
 
   const handlePdf = async () => {
-    const element = printRef.current;
-    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
-    const data = canvas.toDataURL('image/jpeg', 0.7);
+  const element = printRef.current;
+  // 1. Capturamos el diseño con alta calidad
+  const canvas = await html2canvas(element, { 
+    scale: 2,
+    useCORS: true,
+    logging: false
+  });
+  
+  const imgData = canvas.toDataURL('image/jpeg', 0.7); // Compresión para WhatsApp
+  
+  // 2. CALCULAMOS LAS PROPORCIONES REALES
+  const pdfWidth = 210; // Ancho A4 en mm
+  const pageHeight = 297; // Alto A4 estándar
+  const imgWidth = pdfWidth;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width; // Mantiene la relación de aspecto
 
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    pdf.addImage(data, 'JPEG', 0, 0, 210, (canvas.height * 210) / canvas.width);
-    pdf.save(`Presupuesto_DC_${p.cliente}.pdf`);
-  };
+  // 3. CREAMOS EL PDF CON LA ALTURA DEL CONTENIDO
+  // Si el contenido es más largo que una hoja A4, le damos más altura al PDF
+  const pdf = new jsPDF('p', 'mm', [pdfWidth, Math.max(imgHeight, pageHeight)]);
+
+  pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+  pdf.save(`Presupuesto-${p.cliente}.pdf`);
+};
 
   if (loading) return <div className="p-10 text-center font-black text-gray-400 uppercase tracking-widest animate-pulse">Cargando...</div>;
 
