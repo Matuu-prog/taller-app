@@ -78,42 +78,55 @@ export default function PresupuestoDetailPage() {
   }
 };
   
-  return (
+return (
     <div className="min-h-screen bg-gray-50 pb-20 font-sans">
       <header className="bg-white p-4 border-b flex justify-between items-center sticky top-0 z-10 shadow-sm">
-  {/* Botón Volver */}
-  <button onClick={() => navigate('/')} className="p-2 active:bg-gray-100 rounded-full transition-colors">
-    <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
-  </button>
+        {/* Botón Volver */}
+        <button onClick={() => navigate('/')} className="p-2 active:bg-gray-100 rounded-full transition-colors">
+          <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
+        </button>
 
-  <div className="flex items-center gap-3">
-    {/* Botón de Borrar (Trash) */}
-    <button 
-      onClick={handleEliminar} 
-      className="p-2 text-red-400 active:text-red-700 active:bg-red-50 rounded-full transition-all"
-      title="Eliminar presupuesto"
-    >
-      <TrashIcon className="h-5 w-5" />
-    </button>
+        <div className="flex items-center gap-2">
+          {/* Botón Pago Acumulativo */}
+          <button 
+            onClick={() => setShowSeñaModal(true)} 
+            className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-3 py-2 rounded-xl font-black text-[10px] uppercase border border-emerald-100 active:scale-95 transition-all"
+          >
+            <PencilSquareIcon className="h-4 w-4" />
+            Pago
+          </button>
 
-    {/* Etiqueta de Estado */}
-    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${p.status === 'trabajo' ? 'bg-emerald-500 text-white' : 'bg-blue-600 text-white'}`}>
-      {p.status}
-    </span>
-  </div>
-</header>
+          {/* Botón Borrar */}
+          <button 
+            onClick={handleEliminar} 
+            className="p-2 text-red-400 active:text-red-700 active:bg-red-50 rounded-full transition-all"
+          >
+            <TrashIcon className="h-5 w-5" />
+          </button>
+
+          {/* Etiqueta de Estado */}
+          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${p.status === 'trabajo' ? 'bg-emerald-500 text-white' : 'bg-blue-600 text-white'}`}>
+            {p.status}
+          </span>
+        </div>
+      </header>
 
       <div className="p-4 max-w-lg mx-auto">
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <button onClick={handlePdf} className="bg-gray-900 text-white font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
-            <DocumentArrowDownIcon className="h-5 w-5" /> PDF CLIENTE
+        {/* BOTÓN ÚNICO DE DESCARGA */}
+        <div className="mb-6">
+          <button 
+            onClick={handlePdf} 
+            className="w-full bg-gray-900 text-white font-black py-5 rounded-2xl shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all uppercase tracking-widest text-sm border-b-4 border-gray-700"
+          >
+            <DocumentArrowDownIcon className="h-6 w-6" /> 
+            Descargar Presupuesto
           </button>
-          <button onClick={() => window.open(`https://wa.me/?text=Hola ${p.cliente}, te adjunto el presupuesto de DC Herrería.`)} className="bg-green-600 text-white font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
-            <ShareIcon className="h-5 w-5" /> WHATSAPP
-          </button>
+          <p className="text-[9px] text-center text-gray-400 mt-2 font-bold uppercase tracking-tighter">
+            Una vez descargado, podrás compartirlo por WhatsApp
+          </p>
         </div>
 
-        {/* VISTA EN APP (Con detalle) */}
+        {/* VISTA INTERNA DE MATERIALES (Solo visible en la App) */}
         <div className="bg-white p-6 rounded-2xl mb-6 border border-gray-200">
             <h3 className="text-[10px] font-black text-gray-400 uppercase mb-3 italic">Detalle interno de materiales</h3>
             <ul className="space-y-2">
@@ -126,7 +139,7 @@ export default function PresupuestoDetailPage() {
             </ul>
         </div>
 
-        {/* DOCUMENTO PDF (Lo que captura html2canvas) */}
+        {/* DOCUMENTO PDF (Captura de html2canvas) */}
         <div className="bg-white p-10 shadow-2xl border-t-8 border-gray-900" ref={printRef}>
           <div className="flex justify-between items-center mb-12">
             <div>
@@ -158,37 +171,37 @@ export default function PresupuestoDetailPage() {
               <span className="font-black text-2xl">${p.total_final.toLocaleString()}</span>
             </div>
             {p.anticipo > 0 && (
-                <p className="text-[10px] font-black text-emerald-600 uppercase mt-2 italic">A cuenta: ${p.anticipo.toLocaleString()} | Saldo: ${p.saldo.toLocaleString()}</p>
+                <p className="text-[10px] font-black text-emerald-600 uppercase mt-2 italic text-right">A cuenta: ${p.anticipo.toLocaleString()} | Saldo: ${p.saldo.toLocaleString()}</p>
             )}
           </div>
         </div>
       </div>
 
-      {/* MODAL PARA REGISTRAR PAGO ACUMULATIVO */}
-{showSeñaModal && (
-  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 z-50">
-      <div className="bg-white p-8 rounded-[2rem] w-full max-w-sm shadow-2xl">
-          <h3 className="text-xl font-black text-gray-900 uppercase mb-2">Registrar Pago</h3>
-          <p className="text-gray-500 text-xs font-bold mb-6 italic">
-            Ingresá el monto que te entregó el cliente hoy. Se sumará automáticamente al total recibido.
-          </p>
-          <div className="bg-gray-50 p-4 rounded-xl mb-6 border border-dashed border-gray-200">
-             <p className="text-[10px] font-bold text-gray-400 uppercase">Recibido anteriormente:</p>
-             <p className="text-lg font-black text-gray-700">${p.anticipo.toLocaleString()}</p>
-          </div>
-          <input 
-              type="number" value={nuevaSeña} onChange={(e) => setNuevaSeña(e.target.value)}
-              className="w-full bg-gray-100 p-5 rounded-2xl text-2xl font-black mb-6 outline-none focus:ring-2 focus:ring-emerald-500" 
-              placeholder="$ 0"
-              autoFocus
-          />
-          <div className="flex gap-2">
-              <button onClick={() => setShowSeñaModal(false)} className="flex-1 py-4 font-bold text-gray-400 uppercase text-xs">Cancelar</button>
-              <button onClick={handleUpdateSeña} className="flex-1 py-4 bg-emerald-500 text-white font-black rounded-2xl uppercase text-xs shadow-lg shadow-emerald-100">Cargar Pago</button>
-          </div>
-      </div>
-  </div>
-)}
+      {/* MODAL DE PAGO */}
+      {showSeñaModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 z-50">
+            <div className="bg-white p-8 rounded-[2rem] w-full max-w-sm shadow-2xl">
+                <h3 className="text-xl font-black text-gray-900 uppercase mb-2">Registrar Pago</h3>
+                <p className="text-gray-500 text-xs font-bold mb-6 italic">
+                  Ingresá el monto que te entregó el cliente hoy.
+                </p>
+                <div className="bg-gray-50 p-4 rounded-xl mb-6 border border-dashed border-gray-200">
+                   <p className="text-[10px] font-bold text-gray-400 uppercase">Recibido anteriormente:</p>
+                   <p className="text-lg font-black text-gray-700">${p.anticipo.toLocaleString()}</p>
+                </div>
+                <input 
+                    type="number" value={nuevaSeña} onChange={(e) => setNuevaSeña(e.target.value)}
+                    className="w-full bg-gray-100 p-5 rounded-2xl text-2xl font-black mb-6 outline-none focus:ring-2 focus:ring-emerald-500" 
+                    placeholder="$ 0"
+                    autoFocus
+                />
+                <div className="flex gap-2">
+                    <button onClick={() => setShowSeñaModal(false)} className="flex-1 py-4 font-bold text-gray-400 uppercase text-xs">Cancelar</button>
+                    <button onClick={handleUpdateSeña} className="flex-1 py-4 bg-emerald-500 text-white font-black rounded-2xl uppercase text-xs shadow-lg shadow-emerald-100">Cargar Pago</button>
+                </div>
+            </div>
+        </div>
+      )}
     </div>
-  );
+);
 }

@@ -92,31 +92,44 @@ export default function NewPresupuestoPage() {
             </button>
           </div>
           {items.map((item, index) => (
-            <div key={index} className="flex gap-2 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm animate-in fade-in duration-300">
-              <input 
-                type="text" 
-                list="lista-materiales"
-                placeholder="Material" 
-                className="flex-[2] bg-transparent p-2 font-bold outline-none uppercase text-sm"
-                value={item.nombre} onChange={(e) => {
-                  const n = [...items]; n[index].nombre = e.target.value; setItems(n);
-                }} required 
-              />
-              <input 
-                type="number" placeholder="$" 
-                className="flex-1 bg-gray-50 rounded-xl p-2 font-black text-right outline-none text-blue-600"
-                value={item.precio} onChange={(e) => {
-                  const n = [...items]; n[index].precio = e.target.value; setItems(n);
-                }} required 
-              />
-              <button 
-                type="button" onClick={() => setItems(items.filter((_, i) => i !== index))}
-                className="p-2 text-gray-300 hover:text-red-500 transition-colors" disabled={items.length === 1}
-              >
-                <TrashIcon className="h-5 w-5" />
-              </button>
-            </div>
-          ))}
+  <div key={index} className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm animate-in fade-in duration-300">
+    <div className="flex flex-col gap-2">
+      {/* Fila Superior: Nombre del Material */}
+      <div className="flex gap-2">
+        <input 
+          type="text" 
+          list="lista-materiales"
+          placeholder="Nombre del material" 
+          className="flex-1 bg-gray-50 p-3 rounded-xl font-bold outline-none uppercase text-sm border border-transparent focus:border-blue-300"
+          value={item.nombre} onChange={(e) => {
+            const n = [...items]; n[index].nombre = e.target.value; setItems(n);
+          }} required 
+        />
+        {/* Botón borrar arriba a la derecha */}
+        <button 
+          type="button" onClick={() => setItems(items.filter((_, i) => i !== index))}
+          className="p-2 text-gray-300 hover:text-red-500 transition-colors" 
+          disabled={items.length === 1}
+        >
+          <TrashIcon className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Fila Inferior: Precio */}
+      <div className="flex items-center bg-gray-50 rounded-xl px-3">
+        <span className="text-blue-600 font-black mr-2">$</span>
+        <input 
+          type="number" 
+          placeholder="Precio" 
+          className="w-full bg-transparent py-3 font-black text-left outline-none text-blue-600 text-lg"
+          value={item.precio} onChange={(e) => {
+            const n = [...items]; n[index].precio = e.target.value; setItems(n);
+          }} required 
+        />
+      </div>
+    </div>
+  </div>
+))}
         </div>
 
         {/* 3. Mano de Obra con Lógica de Porcentaje */}
