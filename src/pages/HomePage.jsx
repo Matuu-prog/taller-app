@@ -20,24 +20,32 @@ export default function HomePage() {
   .filter(p => p.status === filter)
   .filter(p => p.cliente.toLowerCase().includes(search.toLowerCase()));
 
-// 1. GANANCIA POR MANO DE OBRA (Solo de los trabajos confirmados)
-const gananciaManoObra = presupuestos
-  .filter(p => p.status === 'trabajo')
-  .reduce((acc, p) => acc + (p.mano_obra || 0), 0);
+// 1. GANANCIA REAL COBRADA (Verde)
+// Solo cuenta el dinero que entró y que ya sobra después de cubrir los materiales
+const gananciaRealCobrada = presupuestos.reduce((acc, p) => {
+  const costoMaterial = p.items.reduce((sum, item) => sum + (parseFloat(item.precio) || 0), 0);
+  // Si el anticipo es mayor al material, el sobrante es ganancia real en mano
+  const sobraParaManoObra = Math.max(0, (p.anticipo || 0) - costoMaterial);
+  return acc + sobraParaManoObra;
+}, 0);
 
-// 2. SALDO A COBRAR (Lo que le deben de los trabajos en curso)
+// 2. SALDO A COBRAR (Rojo)
+// Lo que le deben de los trabajos en curso (Mano de obra + Material restante)
 const saldoACobrar = presupuestos
   .filter(p => p.status === 'trabajo')
   .reduce((acc, p) => acc + (p.saldo || 0), 0);
 
-// 3. DINERO PARA MATERIAL RECIBIDO
-// Calculamos cuánto del dinero que ya entró (anticipos) corresponde a materiales
+// 3. DINERO PARA MATERIAL RECIBIDO (Azul)
+// Dinero que entró pero que está destinado a pagar los caños/electrodos
 const dineroMaterialRecibido = presupuestos.reduce((acc, p) => {
-  const totalMateriales = p.items.reduce((sum, item) => sum + (parseFloat(item.precio) || 0), 0);
-  // Si el anticipo es mayor al costo del material, el material ya está cubierto
-  const pagadoParaMaterial = Math.min(p.anticipo || 0, totalMateriales);
+  const costoMaterial = p.items.reduce((sum, item) => sum + (parseFloat(item.precio) || 0), 0);
+  // El material se considera pago solo hasta cubrir su costo total
+  const pagadoParaMaterial = Math.min(p.anticipo || 0, costoMaterial);
   return acc + pagadoParaMaterial;
 }, 0);
+
+
+
   return (
     <div className="min-h-screen bg-slate-100 font-sans pb-24">
       {/* Header negro sólido */}
@@ -48,11 +56,11 @@ const dineroMaterialRecibido = presupuestos.reduce((acc, p) => {
 
 <div className="px-4 py-6 space-y-4">
   {/* Card Principal: GANANCIA (Verde) */}
-  <div className="bg-emerald-600 p-6 rounded-[2.5rem] shadow-xl border-b-8 border-emerald-800">
-    <p className="text-[10px] font-black text-emerald-100 uppercase tracking-widest mb-1 italic">Ganancia Mano de Obra</p>
-    <p className="text-3xl font-black text-white">${gananciaManoObra.toLocaleString()}</p>
-    <p className="text-[9px] font-bold text-emerald-200 mt-2 uppercase">Tu utilidad neta actual</p>
-  </div>
+<div className="bg-emerald-600 p-6 rounded-[2.5rem] shadow-xl border-b-8 border-emerald-800">
+  <p className="text-[10px] font-black text-emerald-100 uppercase tracking-widest mb-1 italic">Ganancia en Mano</p>
+  <p className="text-3xl font-black text-white">${gananciaRealCobrada.toLocaleString()}</p>
+  <p className="text-[9px] font-bold text-emerald-200 mt-2 uppercase">Dinero tuyo ya cobrado</p>
+</div>
 
   <div className="grid grid-cols-2 gap-4">
     {/* Card: Saldo a Cobrar (Rojo) */}
